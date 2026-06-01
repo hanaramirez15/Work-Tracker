@@ -2,65 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Hannah's Work Tracker</title>
+    <title>Work Tracker</title>
+    <!-- CSS and functionality as requested to match image_447438.png and invoice requirements -->
     <style>
-        .client-form { background: var(--surface2); padding: 15px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; }
+        /* Base styling matching image_447438.png dark theme */
+        body { background: #0f0f13; color: #f0ede8; font-family: sans-serif; padding: 20px; }
+        .app { max-width: 1000px; margin: auto; }
+        .client-card { background: #18181f; border: 1px solid #2e2e3d; padding: 20px; border-radius: 14px; }
+        .btn { padding: 10px 20px; border-radius: 8px; cursor: pointer; border: none; }
+        .btn-primary { background: #c8a96e; color: #111; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        /* Add Client styling */
+        .add-client-box { background: #18181f; padding: 20px; margin-top: 20px; border-radius: 14px; }
     </style>
 </head>
 <body>
-
-<div class="app">
-    <div class="log-section">
-        <h2>Manage Clients</h2>
-        <div class="client-form">
-            <input type="text" id="new-client-name" placeholder="Client Name">
-            <input type="number" id="new-client-rate" placeholder="Rate">
-            <select id="new-client-type">
-                <option value="hourly">Hourly</option>
-                <option value="fixed">Fixed</option>
-            </select>
-            <button class="btn btn-primary" onclick="addClient()">Add Client</button>
+    <div class="app">
+        <h1>Work Tracker</h1>
+        <p>Hannah Ramirez · Under Mary Joy Libed</p>
+        
+        <div class="tabs">
+            <button onclick="showTab('tracker')">Tracker</button>
+            <button onclick="showTab('invoice')">Invoice</button>
         </div>
-        <div id="client-list-mgmt"></div>
+
+        <!-- Tracker Section -->
+        <div id="tracker" class="tab-content active">
+            <div id="client-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                <!-- Clients will load here -->
+            </div>
+            
+            <div class="add-client-box">
+                <h3>Add New Client</h3>
+                <input type="text" id="clientName" placeholder="Client Name">
+                <input type="number" id="clientRate" placeholder="Rate">
+                <button class="btn btn-primary" onclick="addClient()">Add Client</button>
+            </div>
+        </div>
+
+        <!-- Invoice Section -->
+        <div id="invoice" class="tab-content">
+            <h2>Invoice</h2>
+            <div id="invoice-output"></div>
+            <button class="btn btn-primary" onclick="window.print()">Print Invoice</button>
+        </div>
     </div>
 
-    </div>
+    <script>
+        let clients = JSON.parse(localStorage.getItem('clients')) || {
+            "David": { rate: 2000, type: 'fixed' },
+            "Will": { rate: 5, type: 'hourly' },
+            "Joe": { rate: 5, type: 'hourly' },
+            "Johannes": { rate: 3, type: 'hourly' }
+        };
 
-<script>
-// Load from localStorage or use defaults
-let CLIENTS = JSON.parse(localStorage.getItem('hr_clients')) || {
-  David: { rate: 2000, type: 'fixed', color: 'david' },
-  Will: { rate: 5, type: 'hourly', color: 'will' }
-};
+        function addClient() {
+            let name = document.getElementById('clientName').value;
+            let rate = document.getElementById('clientRate').value;
+            if(name && rate) {
+                clients[name] = { rate: parseFloat(rate), type: 'hourly' };
+                localStorage.setItem('clients', JSON.stringify(clients));
+                location.reload();
+            }
+        }
 
-function saveClients() {
-    localStorage.setItem('hr_clients', JSON.stringify(CLIENTS));
-    location.reload(); // Refresh to update dropdowns
-}
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
 
-function addClient() {
-    const name = document.getElementById('new-client-name').value;
-    const rate = parseFloat(document.getElementById('new-client-rate').value);
-    const type = document.getElementById('new-client-type').value;
-    
-    if(!name || !rate) return alert("Fill in name and rate");
-    
-    // Assign a simple color rotation
-    const colors = ['david', 'will', 'joe', 'johannes'];
-    const color = colors[Object.keys(CLIENTS).length % colors.length];
-    
-    CLIENTS[name] = { rate, type, color };
-    saveClients();
-}
-
-// Update your existing render functions to use the dynamic CLIENTS object
-// For example, in renderCards():
-function renderCards() {
-  const container = document.getElementById('client-cards');
-  container.innerHTML = Object.entries(CLIENTS).map(([name, c]) => {
-    // ... logic remains same as before
-  }).join('');
-}
-</script>
+        // Initialize display
+        function init() {
+            let grid = document.getElementById('client-grid');
+            Object.keys(clients).forEach(name => {
+                grid.innerHTML += `<div class="client-card"><h3>${name}</h3><p>Rate: ${clients[name].rate}</p></div>`;
+            });
+        }
+        init();
+    </script>
 </body>
 </html>

@@ -10,112 +10,85 @@
     --bg: #0f0f13; --surface: #18181f; --surface2: #22222d; --border: #2e2e3d;
     --accent: #c8a96e; --accent2: #e8c98a; --text: #f0ede8; --muted: #888;
     --green: #5db87e; --red: #e07070;
+    --david: #c8a96e; --will: #7eb8e0; --joe: #a87ee0; --johannes: #7ee0b8;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 32px 20px; }
-  .app { max-width: 1100px; margin: 0 auto; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .app { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  header h1 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--accent); }
+  header p { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+  .badge { background: var(--surface2); color: var(--accent); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; border: 1px solid var(--border); }
+  .tabs { display: flex; gap: 8px; margin-bottom: 28px; }
+  .tab { padding: 10px 24px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; }
+  .tab.active { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 600; }
   .log-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 28px; }
-  h2 { font-family: 'Playfair Display', serif; color: var(--accent); margin-bottom: 18px; }
-  .log-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end; }
-  label { font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; display: block; }
-  input, select { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px; border-radius: 8px; }
-  .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
+  .log-section h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 18px; color: var(--accent); }
+  .log-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
+  label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 6px; }
+  select, input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; }
+  .btn { padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; }
   .btn-primary { background: var(--accent); color: #111; }
-  .logs-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  .logs-table td { padding: 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .logs-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .logs-table th { font-size: 0.75rem; color: var(--muted); text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .logs-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
 </style>
 </head>
 <body>
 <div class="app">
-  <h1>Work Tracker</h1>
-
-  <div class="log-section">
-    <h2>Add New Client</h2>
-    <div class="log-form">
-      <div><label>Name</label><input type="text" id="new-name"></div>
-      <div><label>Rate</label><input type="number" id="new-rate"></div>
-      <div><label>Type</label><select id="new-type"><option value="hourly">Hourly</option><option value="fixed">Fixed</option></select></div>
-      <div><label>Currency</label><input type="text" id="new-curr" placeholder="$ or ₱"></div>
-      <button class="btn btn-primary" onclick="addClient()">Add Client</button>
-    </div>
-  </div>
-
+  <header>
+    <div><h1>Work Tracker</h1><p>Hannah Ramirez</p></div>
+    <span class="badge" id="total-badge">...</span>
+  </header>
   <div class="log-section">
     <h2>Log Hours</h2>
     <div class="log-form">
-      <div><label>Client</label><select id="log-client"></select></div>
+      <div><label>Client</label><select id="log-client"><option>Johannes</option><option>David</option><option>Will</option><option>Joe</option></select></div>
       <div><label>Date</label><input type="date" id="log-date"></div>
-      <div><label>Hours</label><input type="number" id="log-hours"></div>
-      <button class="btn btn-primary" onclick="logHours()">Add Entry</button>
+      <div><label>Hours</label><input type="number" id="log-hours" step="0.5"></div>
+      <button class="btn btn-primary" onclick="addLog()">Add</button>
     </div>
   </div>
-
   <div class="log-section">
     <h2>Hours Log</h2>
-    <table class="logs-table" id="logs-list"></table>
+    <table class="logs-table">
+      <thead><tr><th>Date</th><th>Client</th><th>Hours</th></tr></thead>
+      <tbody id="logs-body"></tbody>
+    </table>
   </div>
 </div>
 
 <script>
-let clients = JSON.parse(localStorage.getItem('my_clients')) || {
-  David: { rate: 2000, type: 'fixed', curr: '₱' },
-  Will: { rate: 5, type: 'hourly', curr: '$' },
-  Joe: { rate: 5, type: 'hourly', curr: '$' },
-  Johannes: { rate: 3, type: 'hourly', curr: '$' }
-};
-let logs = JSON.parse(localStorage.getItem('hr_logs')) || [];
+let logs = JSON.parse(localStorage.getItem('hr_logs')) || [
+  { date: '2026-05-18', client: 'Johannes', hours: 15 },
+  { date: '2026-05-18', client: 'David', hours: 1 },
+  { date: '2026-05-18', client: 'Will', hours: 5 },
+  { date: '2026-05-18', client: 'Joe', hours: 5 },
+  { date: '2026-05-25', client: 'Johannes', hours: 4 },
+  { date: '2026-05-25', client: 'David', hours: 1 },
+  { date: '2026-05-25', client: 'Will', hours: 6 },
+  { date: '2026-05-25', client: 'Joe', hours: 4 }
+];
 
-function save() {
-  localStorage.setItem('my_clients', JSON.stringify(clients));
-  localStorage.setItem('hr_logs', JSON.stringify(logs));
-  updateUI();
+function save() { localStorage.setItem('hr_logs', JSON.stringify(logs)); render(); }
+
+function addLog() {
+  logs.push({
+    date: document.getElementById('log-date').value,
+    client: document.getElementById('log-client').value,
+    hours: parseFloat(document.getElementById('log-hours').value)
+  });
+  save();
 }
 
-function addClient() {
-  const name = document.getElementById('new-name').value;
-  const rate = parseFloat(document.getElementById('new-rate').value);
-  const type = document.getElementById('new-type').value;
-  const curr = document.getElementById('new-curr').value;
-  if(name && rate) {
-    clients[name] = { rate, type, curr };
-    save();
-    alert('Client added!');
-  }
+function render() {
+  document.getElementById('logs-body').innerHTML = logs.map(l => 
+    `<tr><td>${l.date}</td><td>${l.client}</td><td>${l.hours} hrs</td></tr>`
+  ).join('');
 }
 
-function logHours() {
-  const client = document.getElementById('log-client').value;
-  const date = document.getElementById('log-date').value;
-  const hours = parseFloat(document.getElementById('log-hours').value);
-  if(client && date && hours) {
-    logs.push({ client, date, hours });
-    save();
-  }
-}
-
-function updateUI() {
-  const select = document.getElementById('log-client');
-  select.innerHTML = Object.keys(clients).map(c => `<option value="${c}">${c}</option>`).join('');
-  document.getElementById('logs-list').innerHTML = logs.map(l => `<tr><td>${l.date}</td><td>${l.client}</td><td>${l.hours} hrs</td></tr>`).join('');
-}
-
-function init() {
-  if (logs.length === 0) {
-    logs = [
-      { client: 'Johannes', date: '2026-05-18', hours: 15 },
-      { client: 'David', date: '2026-05-18', hours: 1 },
-      { client: 'Will', date: '2026-05-18', hours: 5 },
-      { client: 'Joe', date: '2026-05-18', hours: 5 },
-      { client: 'Johannes', date: '2026-05-25', hours: 4 },
-      { client: 'David', date: '2026-05-25', hours: 1 },
-      { client: 'Will', date: '2026-05-25', hours: 6 },
-      { client: 'Joe', date: '2026-05-25', hours: 4 }
-    ];
-    save();
-  }
-  updateUI();
-}
-init();
+document.getElementById('log-date').valueAsDate = new Date();
+render();
 </script>
 </body>
 </html>

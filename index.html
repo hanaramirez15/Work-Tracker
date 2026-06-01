@@ -1,62 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hannah's Work Tracker</title>
-<!-- Include your original styles from tracker-invoice.html here -->
-<style>
-  /* Use the exact CSS provided in your original tracker-invoice.html file */
-  :root { --bg: #0f0f13; --surface: #18181f; --surface2: #22222d; --border: #2e2e3d; --accent: #c8a96e; --text: #f0ede8; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 32px 20px; }
-  .app { max-width: 1100px; margin: 0 auto; }
-  .log-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 20px; }
-  .btn-primary { background: var(--accent); color: #111; padding: 10px; border-radius: 8px; border: none; cursor: pointer; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .invoice-box { border: 2px solid #333; padding: 20px; }
+        .total { font-weight: bold; font-size: 1.2em; }
+    </style>
 </head>
 <body>
-<div class="app">
-  <h1>Work Tracker</h1>
-  
-  <!-- Add Client Section -->
-  <div class="log-section">
-    <h2>Add Client</h2>
-    <input type="text" id="new-client-name" placeholder="Client Name">
-    <button class="btn-primary" onclick="addClient()">Add</button>
-  </div>
+    <div class="container">
+        <h1>Work Hour Tracker</h1>
+        <table id="trackerTable">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Hours Worked</th>
+                    <th>Rate ($/hr)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Will</td><td><input type="number" class="hours" value="0" oninput="calculate()"></td><td>5</td></tr>
+                <tr><td>Joe</td><td><input type="number" class="hours" value="0" oninput="calculate()"></td><td>5</td></tr>
+                <tr><td>Johannes</td><td><input type="number" class="hours" value="0" oninput="calculate()"></td><td>3</td></tr>
+            </tbody>
+        </table>
 
-  <!-- Hours Log -->
-  <div class="log-section">
-    <h2>Hours Log</h2>
-    <div id="logs-list"></div>
-  </div>
-</div>
+        <div class="invoice-box">
+            <h2>Invoice</h2>
+            <p><strong>From:</strong> Hannah Ramirez</p>
+            <p><strong>To:</strong> Mary Joy Libed</p>
+            <table>
+                <thead>
+                    <tr><th>Item</th><th>Amount</th></tr>
+                </thead>
+                <tbody id="invoiceBody">
+                    <tr><td>David (Fixed)</td><td>2,000 PHP</td></tr>
+                    <tr><td>Will</td><td id="willTotal">$0</td></tr>
+                    <tr><td>Joe</td><td id="joeTotal">$0</td></tr>
+                    <tr><td>Johannes</td><td id="johannesTotal">$0</td></tr>
+                    <tr class="total"><td>Total (USD)</td><td id="grandTotal">$0</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-<script>
-// Your specific data
-let logs = [
-  { date: '2026-05-18', client: 'Johannes', hours: 15 },
-  { date: '2026-05-18', client: 'David', hours: 1 },
-  { date: '2026-05-18', client: 'Will', hours: 5 },
-  { date: '2026-05-18', client: 'Joe', hours: 5 },
-  { date: '2026-05-25', client: 'Johannes', hours: 4 },
-  { date: '2026-05-25', client: 'David', hours: 1 },
-  { date: '2026-05-25', client: 'Will', hours: 6 },
-  { date: '2026-05-25', client: 'Joe', hours: 4 }
-];
+    <script>
+        function calculate() {
+            const inputs = document.querySelectorAll('.hours');
+            const rates = [5, 5, 3];
+            const ids = ['willTotal', 'joeTotal', 'johannesTotal'];
+            let grandTotal = 0;
 
-function render() {
-  document.getElementById('logs-list').innerHTML = logs.map(l => 
-    `<div>${l.date} - ${l.client}: ${l.hours} hrs</div>`
-  ).join('');
-}
-
-function addClient() {
-  const name = document.getElementById('new-client-name').value;
-  alert('Added ' + name);
-}
-
-render();
-</script>
+            inputs.forEach((input, index) => {
+                const total = input.value * rates[index];
+                document.getElementById(ids[index]).innerText = '$' + total;
+                grandTotal += total;
+            });
+            document.getElementById('grandTotal').innerText = '$' + grandTotal;
+        }
+    </script>
 </body>
 </html>

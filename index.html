@@ -1,70 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Hannah's Admin Dashboard</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; background: var(--bg); }
+        
+        /* Sidebar Styling */
+        nav { width: 220px; background: var(--primary); height: 100vh; color: white; padding: 20px; }
+        nav h2 { font-size: 1.2rem; margin-bottom: 30px; color: #ecf0f1; }
+        nav button { display: block; width: 100%; padding: 12px; margin-bottom: 10px; background: none; border: none; color: white; text-align: left; cursor: pointer; border-radius: 5px; transition: 0.3s; }
+        nav button:hover { background: var(--accent); }
+
+        /* Main Content */
+        main { flex: 1; padding: 40px; }
+        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        input { padding: 10px; margin-right: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button.action { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        
         .tab { display: none; }
         .active { display: block; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
     </style>
 </head>
 <body>
 
-    <h2>Admin Dashboard: Client Management</h2>
-    <button onclick="showTab('dashboard')">Dashboard</button>
-    <button onclick="showTab('clients')">Manage Clients</button>
-    <button onclick="showTab('logs')">Log Hours</button>
+    <nav>
+        <h2>Admin Console</h2>
+        <button onclick="showTab('dashboard')">Dashboard</button>
+        <button onclick="showTab('clients')">Manage Clients</button>
+        <button onclick="showTab('logs')">Log Hours</button>
+    </nav>
 
-    <div id="clients" class="tab">
-        <h3>Add Client</h3>
-        <input id="cName" placeholder="Client Name">
-        <input id="cHours" type="number" placeholder="Weekly Hours">
-        <input id="cRate" type="number" placeholder="Rate/Hr">
-        <button onclick="addClient()">Save Client</button>
-        <table id="clientTable">
-            <tr><th>Client</th><th>Weekly Hours</th><th>Rate/Hr</th></tr>
-        </table>
-    </div>
+    <main>
+        <div id="dashboard" class="tab active card">
+            <h3>Weekly Overview</h3>
+            <p>Welcome back, Hannah. Current week performance:</p>
+            <div id="summary"></div>
+        </div>
 
-    <div id="logs" class="tab">
-        <h3>Log Hours</h3>
-        <input id="logDate" type="date">
-        <input id="logHours" type="number" placeholder="Hours">
-        <button onclick="addLog()">Save Log</button>
-    </div>
+        <div id="clients" class="tab card">
+            <h3>Add New Client</h3>
+            <input id="cName" placeholder="Client Name">
+            <input id="cHours" type="number" placeholder="Weekly Hours">
+            <input id="cRate" type="number" placeholder="Rate/Hr">
+            <button class="action" onclick="addClient()">Add Client</button>
+            <table id="clientTable">
+                <tr><th>Client</th><th>Hours</th><th>Rate</th></tr>
+            </table>
+        </div>
 
-    <div id="dashboard" class="tab active">
-        <h3>Weekly Overview</h3>
-        <div id="summary"></div>
-    </div>
+        <div id="logs" class="tab card">
+            <h3>Log Daily Hours</h3>
+            <input id="logDate" type="date">
+            <input id="logHours" type="number" placeholder="Hours Worked">
+            <button class="action" onclick="addLog()">Save Log</button>
+        </div>
+    </main>
 
     <script>
+        // Data logic
         let clients = JSON.parse(localStorage.getItem('clients')) || [];
-        let logs = JSON.parse(localStorage.getItem('logs')) || [];
-
         function showTab(id) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
-
         function addClient() {
             clients.push({name: document.getElementById('cName').value, hours: document.getElementById('cHours').value, rate: document.getElementById('cRate').value});
             localStorage.setItem('clients', JSON.stringify(clients));
             location.reload();
         }
-
-        function addLog() {
-            logs.push({date: document.getElementById('logDate').value, hours: document.getElementById('logHours').value});
-            localStorage.setItem('logs', JSON.stringify(logs));
-            alert("Logged!");
-        }
-
-        // Render initial data
+        // Load table
         clients.forEach(c => {
             let row = document.getElementById('clientTable').insertRow();
-            row.innerHTML = `<td>${c.name}</td><td>${c.hours}</td><td>${c.rate}</td>`;
+            row.innerHTML = `<td>${c.name}</td><td>${c.hours}</td><td>$${c.rate}</td>`;
         });
     </script>
 </body>

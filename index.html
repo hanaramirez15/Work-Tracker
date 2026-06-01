@@ -2,69 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice Generator</title>
+    <title>Hannah's Work Tracker</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; line-height: 1.6; }
-        .container { max-width: 800px; margin: auto; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        .invoice-box { border: 2px solid #333; padding: 20px; }
-        .total { font-weight: bold; font-size: 1.2em; }
+        .client-form { background: var(--surface2); padding: 15px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Work Hour Tracker</h1>
-        <table id="trackerTable">
-            <thead>
-                <tr>
-                    <th>Client</th>
-                    <th>Hours Worked</th>
-                    <th>Rate ($/hr)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>Will</td><td><input type="number" class="hours" value="0" oninput="calculate()"></td><td>5</td></tr>
-                <tr><td>Joe</td><td><input type="number" class="hours" value="0" oninput="calculate()"></td><td>5</td></tr>
-                <tr><td>Johannes</td><td><input type="number" class="hours" value="0" oninput="calculate()"></td><td>3</td></tr>
-            </tbody>
-        </table>
 
-        <div class="invoice-box">
-            <h2>Invoice</h2>
-            <p><strong>From:</strong> Hannah Ramirez</p>
-            <p><strong>To:</strong> Mary Joy Libed</p>
-            <table>
-                <thead>
-                    <tr><th>Item</th><th>Amount</th></tr>
-                </thead>
-                <tbody id="invoiceBody">
-                    <tr><td>David (Fixed)</td><td>2,000 PHP</td></tr>
-                    <tr><td>Will</td><td id="willTotal">$0</td></tr>
-                    <tr><td>Joe</td><td id="joeTotal">$0</td></tr>
-                    <tr><td>Johannes</td><td id="johannesTotal">$0</td></tr>
-                    <tr class="total"><td>Total (USD)</td><td id="grandTotal">$0</td></tr>
-                </tbody>
-            </table>
+<div class="app">
+    <div class="log-section">
+        <h2>Manage Clients</h2>
+        <div class="client-form">
+            <input type="text" id="new-client-name" placeholder="Client Name">
+            <input type="number" id="new-client-rate" placeholder="Rate">
+            <select id="new-client-type">
+                <option value="hourly">Hourly</option>
+                <option value="fixed">Fixed</option>
+            </select>
+            <button class="btn btn-primary" onclick="addClient()">Add Client</button>
         </div>
+        <div id="client-list-mgmt"></div>
     </div>
 
-    <script>
-        function calculate() {
-            const inputs = document.querySelectorAll('.hours');
-            const rates = [5, 5, 3];
-            const ids = ['willTotal', 'joeTotal', 'johannesTotal'];
-            let grandTotal = 0;
+    </div>
 
-            inputs.forEach((input, index) => {
-                const total = input.value * rates[index];
-                document.getElementById(ids[index]).innerText = '$' + total;
-                grandTotal += total;
-            });
-            document.getElementById('grandTotal').innerText = '$' + grandTotal;
-        }
-    </script>
+<script>
+// Load from localStorage or use defaults
+let CLIENTS = JSON.parse(localStorage.getItem('hr_clients')) || {
+  David: { rate: 2000, type: 'fixed', color: 'david' },
+  Will: { rate: 5, type: 'hourly', color: 'will' }
+};
+
+function saveClients() {
+    localStorage.setItem('hr_clients', JSON.stringify(CLIENTS));
+    location.reload(); // Refresh to update dropdowns
+}
+
+function addClient() {
+    const name = document.getElementById('new-client-name').value;
+    const rate = parseFloat(document.getElementById('new-client-rate').value);
+    const type = document.getElementById('new-client-type').value;
+    
+    if(!name || !rate) return alert("Fill in name and rate");
+    
+    // Assign a simple color rotation
+    const colors = ['david', 'will', 'joe', 'johannes'];
+    const color = colors[Object.keys(CLIENTS).length % colors.length];
+    
+    CLIENTS[name] = { rate, type, color };
+    saveClients();
+}
+
+// Update your existing render functions to use the dynamic CLIENTS object
+// For example, in renderCards():
+function renderCards() {
+  const container = document.getElementById('client-cards');
+  container.innerHTML = Object.entries(CLIENTS).map(([name, c]) => {
+    // ... logic remains same as before
+  }).join('');
+}
+</script>
 </body>
 </html>

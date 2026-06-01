@@ -1,81 +1,500 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; background: var(--bg); }
-        
-        /* Sidebar Styling */
-        nav { width: 220px; background: var(--primary); height: 100vh; color: white; padding: 20px; }
-        nav h2 { font-size: 1.2rem; margin-bottom: 30px; color: #ecf0f1; }
-        nav button { display: block; width: 100%; padding: 12px; margin-bottom: 10px; background: none; border: none; color: white; text-align: left; cursor: pointer; border-radius: 5px; transition: 0.3s; }
-        nav button:hover { background: var(--accent); }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hannah's Work Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #18181f;
+    --surface2: #22222d;
+    --border: #2e2e3d;
+    --accent: #c8a96e;
+    --accent2: #e8c98a;
+    --text: #f0ede8;
+    --muted: #888;
+    --green: #5db87e;
+    --red: #e07070;
+    --david: #c8a96e;
+    --will: #7eb8e0;
+    --joe: #a87ee0;
+    --johannes: #7ee0b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .app { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+  header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border);
+  }
+  header h1 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--accent); }
+  header p { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+  .badge { background: var(--surface2); color: var(--accent); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; border: 1px solid var(--border); }
 
-        /* Main Content */
-        main { flex: 1; padding: 40px; }
-        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
-        input { padding: 10px; margin-right: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        button.action { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-        
-        .tab { display: none; }
-        .active { display: block; }
-    </style>
+  /* Tabs */
+  .tabs { display: flex; gap: 8px; margin-bottom: 28px; }
+  .tab {
+    padding: 10px 24px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted); cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; transition: all 0.2s;
+  }
+  .tab.active { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 600; }
+
+  /* Client Cards */
+  .clients-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .client-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px; position: relative; overflow: hidden;
+  }
+  .client-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .client-card.david::before { background: var(--david); }
+  .client-card.will::before { background: var(--will); }
+  .client-card.joe::before { background: var(--joe); }
+  .client-card.johannes::before { background: var(--johannes); }
+  .client-name { font-family: 'Playfair Display', serif; font-size: 1.25rem; margin-bottom: 4px; }
+  .client-rate { color: var(--muted); font-size: 0.82rem; margin-bottom: 16px; }
+  .client-earned { font-size: 1.6rem; font-weight: 600; }
+  .client-earned.david { color: var(--david); }
+  .client-earned.will { color: var(--will); }
+  .client-earned.joe { color: var(--joe); }
+  .client-earned.johannes { color: var(--johannes); }
+  .client-hours { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+
+  /* Log Hours */
+  .log-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 28px; }
+  .log-section h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 18px; color: var(--accent); }
+  .log-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
+  label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 6px; }
+  select, input[type="date"], input[type="number"], input[type="text"], textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  select:focus, input:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--surface2); }
+  .btn {
+    padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #111; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); font-size: 0.78rem; padding: 5px 12px; }
+  .btn-danger:hover { background: var(--red); color: #fff; }
+  .btn-invoice { background: var(--surface2); color: var(--accent); border: 1px solid var(--accent); }
+  .btn-invoice:hover { background: var(--accent); color: #111; }
+
+  /* Logs Table */
+  .logs-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .logs-table th { font-size: 0.75rem; color: var(--muted); text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; }
+  .logs-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+  .logs-table tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+  .dot.david { background: var(--david); }
+  .dot.will { background: var(--will); }
+  .dot.joe { background: var(--joe); }
+  .dot.johannes { background: var(--johannes); }
+  .empty-state { text-align: center; color: var(--muted); padding: 40px; font-size: 0.9rem; }
+
+  /* Invoice Tab */
+  .invoice-controls { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 24px; }
+  .invoice-controls h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--accent); margin-bottom: 18px; }
+  .inv-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .inv-clients { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+  .inv-client-toggle {
+    padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface2); cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; color: var(--muted); transition: all 0.2s;
+  }
+  .inv-client-toggle.selected.david { border-color: var(--david); background: #c8a96e22; color: var(--david); }
+  .inv-client-toggle.selected.will { border-color: var(--will); background: #7eb8e022; color: var(--will); }
+  .inv-client-toggle.selected.joe { border-color: var(--joe); background: #a87ee022; color: var(--joe); }
+  .inv-client-toggle.selected.johannes { border-color: var(--johannes); background: #7ee0b822; color: var(--johannes); }
+
+  /* Invoice Preview */
+  .invoice-preview {
+    background: #fff; color: #111; border-radius: 14px; padding: 48px;
+    max-width: 720px; margin: 0 auto; font-family: 'DM Sans', sans-serif;
+  }
+  .inv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
+  .inv-logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #111; }
+  .inv-logo span { color: #c8a96e; }
+  .inv-number { text-align: right; }
+  .inv-number h2 { font-size: 1.4rem; font-weight: 700; color: #111; }
+  .inv-number p { color: #888; font-size: 0.85rem; }
+  .inv-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 36px; padding-bottom: 28px; border-bottom: 2px solid #f0ede8; }
+  .inv-party-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #aaa; margin-bottom: 8px; }
+  .inv-party-name { font-weight: 600; font-size: 1rem; color: #111; }
+  .inv-party-detail { font-size: 0.85rem; color: #666; margin-top: 2px; }
+  .inv-items { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+  .inv-items th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #aaa; text-align: left; padding: 8px 12px; border-bottom: 2px solid #f0ede8; }
+  .inv-items th:last-child, .inv-items td:last-child { text-align: right; }
+  .inv-items td { padding: 12px; font-size: 0.9rem; border-bottom: 1px solid #f5f3ef; }
+  .inv-total-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+  .inv-total-box { background: #f9f7f3; border-radius: 10px; padding: 16px 24px; min-width: 220px; }
+  .inv-total-line { display: flex; justify-content: space-between; font-size: 0.88rem; color: #555; margin-bottom: 8px; }
+  .inv-total-final { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 700; color: #111; border-top: 1px solid #ddd; padding-top: 10px; margin-top: 4px; }
+  .inv-footer { text-align: center; color: #bbb; font-size: 0.78rem; margin-top: 36px; border-top: 1px solid #f0ede8; padding-top: 20px; }
+  .inv-status { display: inline-block; background: #fff5e0; color: #c8a96e; border: 1px solid #c8a96e55; border-radius: 20px; padding: 4px 14px; font-size: 0.78rem; font-weight: 600; }
+
+  .print-btn { display: block; margin: 16px auto 0; }
+  @media print {
+    body { background: #fff; }
+    .app > *:not(#invoice-view) { display: none; }
+    #invoice-view .invoice-controls { display: none; }
+    .print-btn { display: none; }
+    .invoice-preview { box-shadow: none; border-radius: 0; }
+  }
+  @media (max-width: 650px) {
+    .log-form { grid-template-columns: 1fr 1fr; }
+    .inv-row { grid-template-columns: 1fr; }
+    .invoice-preview { padding: 28px 18px; }
+    .inv-header { flex-direction: column; gap: 16px; }
+    .inv-parties { grid-template-columns: 1fr; gap: 16px; }
+  }
+</style>
 </head>
 <body>
+<div class="app">
+  <header>
+    <div>
+      <h1>Work Tracker</h1>
+      <p>Hannah Ramirez · Under Mary Joy Libed</p>
+    </div>
+    <span class="badge" id="total-badge">Loading...</span>
+  </header>
 
-    <nav>
-        <h2>Admin Console</h2>
-        <button onclick="showTab('dashboard')">Dashboard</button>
-        <button onclick="showTab('clients')">Manage Clients</button>
-        <button onclick="showTab('logs')">Log Hours</button>
-    </nav>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('tracker')">📋 Tracker</button>
+    <button class="tab" onclick="showTab('invoice')">🧾 Invoice</button>
+  </div>
 
-    <main>
-        <div id="dashboard" class="tab active card">
-            <h3>Weekly Overview</h3>
-            <p>Welcome back, Hannah. Current week performance:</p>
-            <div id="summary"></div>
+  <!-- TRACKER TAB -->
+  <div id="tab-tracker">
+    <div class="clients-grid" id="client-cards"></div>
+
+    <div class="log-section">
+      <h2>Log Hours</h2>
+      <div class="log-form">
+        <div>
+          <label>Client</label>
+          <select id="log-client">
+            <option value="David">David</option>
+            <option value="Will">Will</option>
+            <option value="Joe">Joe</option>
+            <option value="Johannes">Johannes</option>
+          </select>
         </div>
-
-        <div id="clients" class="tab card">
-            <h3>Add New Client</h3>
-            <input id="cName" placeholder="Client Name">
-            <input id="cHours" type="number" placeholder="Weekly Hours">
-            <input id="cRate" type="number" placeholder="Rate/Hr">
-            <button class="action" onclick="addClient()">Add Client</button>
-            <table id="clientTable">
-                <tr><th>Client</th><th>Hours</th><th>Rate</th></tr>
-            </table>
+        <div>
+          <label>Date</label>
+          <input type="date" id="log-date">
         </div>
-
-        <div id="logs" class="tab card">
-            <h3>Log Daily Hours</h3>
-            <input id="logDate" type="date">
-            <input id="logHours" type="number" placeholder="Hours Worked">
-            <button class="action" onclick="addLog()">Save Log</button>
+        <div>
+          <label>Hours</label>
+          <input type="number" id="log-hours" min="0.5" max="24" step="0.5" placeholder="e.g. 3">
         </div>
-    </main>
+        <div>
+          <button class="btn btn-primary" onclick="logHours()">Add</button>
+        </div>
+      </div>
+    </div>
 
-    <script>
-        // Data logic
-        let clients = JSON.parse(localStorage.getItem('clients')) || [];
-        function showTab(id) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-        function addClient() {
-            clients.push({name: document.getElementById('cName').value, hours: document.getElementById('cHours').value, rate: document.getElementById('cRate').value});
-            localStorage.setItem('clients', JSON.stringify(clients));
-            location.reload();
-        }
-        // Load table
-        clients.forEach(c => {
-            let row = document.getElementById('clientTable').insertRow();
-            row.innerHTML = `<td>${c.name}</td><td>${c.hours}</td><td>$${c.rate}</td>`;
-        });
-    </script>
+    <div class="log-section">
+      <h2>Hours Log</h2>
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <select id="filter-client" onchange="renderLogs()" style="max-width:160px;">
+          <option value="">All Clients</option>
+          <option value="David">David</option>
+          <option value="Will">Will</option>
+          <option value="Joe">Joe</option>
+          <option value="Johannes">Johannes</option>
+        </select>
+        <input type="month" id="filter-month" onchange="renderLogs()" style="max-width:160px;">
+      </div>
+      <div id="logs-container"></div>
+    </div>
+  </div>
+
+  <!-- INVOICE TAB -->
+  <div id="tab-invoice" style="display:none;">
+    <div class="invoice-controls">
+      <h2>Generate Invoice</h2>
+      <div class="inv-row">
+        <div>
+          <label>Invoice Number</label>
+          <input type="text" id="inv-number" placeholder="e.g. INV-001">
+        </div>
+        <div>
+          <label>Issue Date</label>
+          <input type="date" id="inv-date">
+        </div>
+        <div>
+          <label>Due Date</label>
+          <input type="date" id="inv-due">
+        </div>
+      </div>
+      <div>
+        <label>Include Clients</label>
+        <div class="inv-clients" id="inv-client-toggles"></div>
+      </div>
+      <div style="margin-top:8px;">
+        <label>Filter by Month (optional)</label>
+        <input type="month" id="inv-month" style="max-width:200px;" oninput="generateInvoice()">
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px;">
+        <button class="btn btn-primary" onclick="generateInvoice()">Preview Invoice</button>
+        <button class="btn btn-invoice" onclick="printInvoice()">🖨 Print / Save PDF</button>
+      </div>
+    </div>
+
+    <div id="invoice-preview-wrap"></div>
+  </div>
+</div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────────
+const CLIENTS = {
+  David:     { rate: 2000, currency: '₱', type: 'fixed',   color: 'david',    label: 'Fixed ₱2,000/week' },
+  Will:      { rate: 5,    currency: '$', type: 'hourly',  color: 'will',     label: '$5/hr · 10 hrs/wk' },
+  Joe:       { rate: 5,    currency: '$', type: 'hourly',  color: 'joe',      label: '$5/hr · 10 hrs/wk' },
+  Johannes:  { rate: 3,    currency: '$', type: 'hourly',  color: 'johannes', label: '$3/hr · 30 hrs/wk' },
+};
+
+let logs = JSON.parse(localStorage.getItem('hr_logs') || '[]');
+
+function save() { localStorage.setItem('hr_logs', JSON.stringify(logs)); }
+
+// ── Helpers ─────────────────────────────────────────────────────────────
+function fmt(n, c='$') { return c + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+function fmtPeso(n) { return '₱' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+
+function getEarnings(client, filteredLogs) {
+  const c = CLIENTS[client];
+  if (c.type === 'fixed') {
+    // Count distinct ISO weeks in logs
+    const weeks = new Set(filteredLogs.filter(l=>l.client===client).map(l=>{
+      const d = new Date(l.date); const jan4 = new Date(d.getFullYear(),0,4);
+      return d.getFullYear()+'-W'+Math.ceil(((d-jan4)/86400000+jan4.getDay()+1)/7);
+    }));
+    return weeks.size * c.rate;
+  }
+  const hours = filteredLogs.filter(l=>l.client===client).reduce((s,l)=>s+l.hours,0);
+  return hours * c.rate;
+}
+
+function getTotalHours(client, filteredLogs) {
+  return filteredLogs.filter(l=>l.client===client).reduce((s,l)=>s+l.hours,0);
+}
+
+// ── Render Cards ─────────────────────────────────────────────────────────
+function renderCards() {
+  const html = Object.entries(CLIENTS).map(([name, c]) => {
+    const earned = getEarnings(name, logs);
+    const hours = getTotalHours(name, logs);
+    const sym = c.currency;
+    return `<div class="client-card ${c.color}">
+      <div class="client-name">${name}</div>
+      <div class="client-rate">${c.label}</div>
+      <div class="client-earned ${c.color}">${c.type==='fixed' ? fmtPeso(earned) : fmt(earned, sym)}</div>
+      <div class="client-hours">${c.type==='fixed' ? Math.round(earned/c.rate)+' week(s) logged' : hours+' hrs logged'}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('client-cards').innerHTML = html;
+
+  // Total badge (rough PHP conversion for mixed currencies — just show per currency)
+  const peso = getEarnings('David', logs);
+  const usd = ['Will','Joe','Johannes'].reduce((s,n)=>s+getEarnings(n,logs),0);
+  document.getElementById('total-badge').textContent = `₱${peso.toFixed(0)} + $${usd.toFixed(2)}`;
+}
+
+// ── Render Logs ──────────────────────────────────────────────────────────
+function renderLogs() {
+  const cf = document.getElementById('filter-client').value;
+  const mf = document.getElementById('filter-month').value;
+  let filtered = logs.filter(l => {
+    if (cf && l.client !== cf) return false;
+    if (mf && !l.date.startsWith(mf)) return false;
+    return true;
+  });
+  filtered = [...filtered].sort((a,b)=>b.date.localeCompare(a.date));
+
+  if (!filtered.length) {
+    document.getElementById('logs-container').innerHTML = '<div class="empty-state">No entries yet. Start logging hours above!</div>';
+    return;
+  }
+  const rows = filtered.map(l=>{
+    const c = CLIENTS[l.client];
+    const amt = c.type==='fixed' ? '—' : fmt(l.hours*c.rate, c.currency);
+    return `<tr>
+      <td><span class="dot ${c.color}"></span>${l.date}</td>
+      <td>${l.client}</td>
+      <td>${l.hours} hrs</td>
+      <td>${amt}</td>
+      <td><button class="btn btn-danger" onclick="deleteLog('${l.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('logs-container').innerHTML = `
+    <table class="logs-table">
+      <thead><tr><th>Date</th><th>Client</th><th>Hours</th><th>Amount</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ── Log Hours ────────────────────────────────────────────────────────────
+function logHours() {
+  const client = document.getElementById('log-client').value;
+  const date   = document.getElementById('log-date').value;
+  const hours  = parseFloat(document.getElementById('log-hours').value);
+  if (!date) { alert('Please select a date.'); return; }
+  if (!hours || hours <= 0) { alert('Please enter valid hours.'); return; }
+  logs.push({ id: Date.now().toString(), client, date, hours });
+  save(); renderCards(); renderLogs();
+  document.getElementById('log-hours').value = '';
+}
+
+function deleteLog(id) {
+  logs = logs.filter(l=>l.id!==id);
+  save(); renderCards(); renderLogs();
+}
+
+// ── Invoice ──────────────────────────────────────────────────────────────
+let selectedInvClients = new Set(['David','Will','Joe','Johannes']);
+
+function renderInvToggles() {
+  const wrap = document.getElementById('inv-client-toggles');
+  wrap.innerHTML = Object.keys(CLIENTS).map(name=>{
+    const sel = selectedInvClients.has(name) ? 'selected' : '';
+    return `<button class="inv-client-toggle ${CLIENTS[name].color} ${sel}" onclick="toggleInvClient('${name}')">${name}</button>`;
+  }).join('');
+}
+
+function toggleInvClient(name) {
+  if (selectedInvClients.has(name)) selectedInvClients.delete(name);
+  else selectedInvClients.add(name);
+  renderInvToggles(); generateInvoice();
+}
+
+function generateInvoice() {
+  const num    = document.getElementById('inv-number').value || 'INV-001';
+  const date   = document.getElementById('inv-date').value || new Date().toISOString().slice(0,10);
+  const due    = document.getElementById('inv-due').value || '';
+  const month  = document.getElementById('inv-month').value;
+
+  const filteredLogs = month ? logs.filter(l=>l.date.startsWith(month)) : logs;
+
+  const items = [...selectedInvClients].map(name=>{
+    const c = CLIENTS[name];
+    const hrs = getTotalHours(name, filteredLogs);
+    const earned = getEarnings(name, filteredLogs);
+    if (c.type === 'fixed') {
+      const weeks = new Set(filteredLogs.filter(l=>l.client===name).map(l=>{
+        const d=new Date(l.date); const jan4=new Date(d.getFullYear(),0,4);
+        return d.getFullYear()+'-W'+Math.ceil(((d-jan4)/86400000+jan4.getDay()+1)/7);
+      })).size;
+      if (!weeks) return null;
+      return { name, desc:`Fixed rate service (${weeks} week${weeks>1?'s':''})`, qty:weeks, rate:'₱2,000/week', amt:earned, sym:'₱' };
+    } else {
+      if (!hrs) return null;
+      return { name, desc:`Freelance work @ ${c.currency}${c.rate}/hr`, qty:hrs, rate:`${c.currency}${c.rate}/hr`, amt:earned, sym:c.currency };
+    }
+  }).filter(Boolean);
+
+  if (!items.length) {
+    document.getElementById('invoice-preview-wrap').innerHTML = '<div class="empty-state" style="color:#888;text-align:center;padding:40px;">No data for selected clients/period.</div>';
+    return;
+  }
+
+  const pesoPart = items.filter(i=>i.sym==='₱').reduce((s,i)=>s+i.amt,0);
+  const usdPart  = items.filter(i=>i.sym==='$').reduce((s,i)=>s+i.amt,0);
+
+  const rows = items.map(i=>`
+    <tr>
+      <td><strong>${i.name}</strong><br><span style="color:#888;font-size:0.82rem">${i.desc}</span></td>
+      <td style="text-align:center">${i.qty}</td>
+      <td style="text-align:center">${i.rate}</td>
+      <td style="text-align:right;font-weight:600">${i.sym}${i.amt.toFixed(2)}</td>
+    </tr>`).join('');
+
+  const totals = [];
+  if (pesoPart) totals.push(`<div class="inv-total-final"><span>Total (PHP)</span><span>₱${pesoPart.toFixed(2)}</span></div>`);
+  if (usdPart)  totals.push(`<div class="inv-total-final"><span>Total (USD)</span><span>$${usdPart.toFixed(2)}</span></div>`);
+
+  const periodLabel = month ? `Period: ${month}` : 'All logged hours';
+
+  document.getElementById('invoice-preview-wrap').innerHTML = `
+  <div class="invoice-preview" id="inv-print-area">
+    <div class="inv-header">
+      <div>
+        <div class="inv-logo">Hannah<span>.</span></div>
+        <div style="color:#888;font-size:0.82rem;margin-top:4px;">Freelance Services</div>
+      </div>
+      <div class="inv-number">
+        <h2>${num}</h2>
+        <span class="inv-status">UNPAID</span>
+        <p style="margin-top:8px;">Issued: ${date}</p>
+        ${due ? `<p>Due: ${due}</p>` : ''}
+      </div>
+    </div>
+    <div class="inv-parties">
+      <div>
+        <div class="inv-party-label">From</div>
+        <div class="inv-party-name">Hannah Ramirez</div>
+        <div class="inv-party-detail">Freelancer</div>
+      </div>
+      <div>
+        <div class="inv-party-label">Bill To</div>
+        <div class="inv-party-name">Mary Joy Libed</div>
+        <div class="inv-party-detail">Client / Employer</div>
+      </div>
+    </div>
+    <div style="font-size:0.78rem;color:#aaa;margin-bottom:16px;">${periodLabel}</div>
+    <table class="inv-items">
+      <thead><tr><th>Description</th><th style="text-align:center">Qty/Hrs</th><th style="text-align:center">Rate</th><th style="text-align:right">Amount</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="inv-total-row">
+      <div class="inv-total-box">
+        ${totals.join('')}
+      </div>
+    </div>
+    <div class="inv-footer">
+      Thank you for the opportunity to work with you!<br>
+      Please process payment by the due date.
+    </div>
+  </div>`;
+}
+
+function printInvoice() {
+  window.print();
+}
+
+// ── Tab Switch ────────────────────────────────────────────────────────────
+function showTab(tab) {
+  document.getElementById('tab-tracker').style.display = tab==='tracker' ? '' : 'none';
+  document.getElementById('tab-invoice').style.display = tab==='invoice' ? '' : 'none';
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active', (i===0&&tab==='tracker')||(i===1&&tab==='invoice'));
+  });
+  if (tab==='invoice') { renderInvToggles(); generateInvoice(); }
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────
+document.getElementById('log-date').value = new Date().toISOString().slice(0,10);
+document.getElementById('inv-date').value = new Date().toISOString().slice(0,10);
+// Default due date 15 days from now
+const due = new Date(); due.setDate(due.getDate()+15);
+document.getElementById('inv-due').value = due.toISOString().slice(0,10);
+
+renderCards();
+renderLogs();
+</script>
 </body>
 </html>
